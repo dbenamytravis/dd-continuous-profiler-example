@@ -59,24 +59,14 @@ def main():
 @app.route('/movies')
 def movies():
     query: str = request.args.get("q", request.args.get("query"))
-
     movies = get_movies()
-
-    # Problem: We are sorting over the entire list but might be filtering most of it out later.
-    # Solution: Sort after filtering
     movies = sort_desc_releasedate(movies)
-
     if query:
         movies = [m for m in movies if re.search(query.upper(), m.title.upper())]
-
     return jsonify([m.to_dict() for m in movies])
 
 
 def sort_desc_releasedate(movies: List[Movie]) -> List[Movie]:
-    # Problem: We are parsing a datetime for each comparison during sort
-    # Example Solution:
-    #   Since date is in isoformat (yyyy-mm-dd) already, that one sorts nicely with normal string sorting
-    #   `return sorted(movies, key=lambda m: m.release_date, reverse=True)`
     def sorting_cmp(m1: Movie, m2: Movie) -> int:
         try:
             m1_dt = datetime.date.fromisoformat(m1.release_date)
